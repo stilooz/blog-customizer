@@ -12,30 +12,29 @@ import { Separator } from '../../ui/separator';
 import { Text } from '../../ui/text';
 
 type ArticleParamsFormProps = {
-	fontFamily: (select: OptionType) => void;
-	fontSize: (select: OptionType) => void;
-	fontColor: (select: OptionType) => void;
-	backgroundColor: (select: OptionType) => void;
-	contentWidth: (select: OptionType) => void;
-	resetButton: () => void;
-	applyButton: (event: FormEvent) => void;
-	sideBarState: ArticleStateType;
+	onFontFamilyChange: (select: OptionType) => void;
+	onFontSizeChange: (select: OptionType) => void;
+	onFontColorChange: (select: OptionType) => void;
+	onBackgroundColorChange: (select: OptionType) => void;
+	onContentWidthChange: (select: OptionType) => void;
+	onReset: () => void;
+	onApply: (event: FormEvent) => void;
+	settingsDraft: ArticleStateType;
 };
 
 export const ArticleParamsForm = ({
-	fontFamily,
-	fontSize,
-	fontColor,
-	backgroundColor,
-	contentWidth,
-	resetButton,
-	applyButton,
-	sideBarState,
+	onFontFamilyChange,
+	onFontSizeChange,
+	onFontColorChange,
+	onBackgroundColorChange,
+	onContentWidthChange,
+	onReset,
+	onApply,
+	settingsDraft,
 }: ArticleParamsFormProps) => {
 	const ref = useRef<HTMLFormElement | null>(null);
 	const [open, setOpen] = useState(false);
 
-	// Простая логика закрытия по клику вне формы
 	useEffect(() => {
 		const handleClickOutside = (event: MouseEvent) => {
 			if (ref.current && !ref.current.contains(event.target as Node)) {
@@ -60,45 +59,45 @@ export const ArticleParamsForm = ({
 		<>
 			<ArrowButton onClick={toggleForm} isOpen={open} />
 			<aside className={clsx(styles.container, { [styles.container_open]: open })}>
-				<form className={styles.form} ref={ref} onSubmit={applyButton}>
+				<form className={styles.form} ref={ref} onSubmit={onApply}>
 					<Text size={31} weight={800} uppercase as={'h3'} align='center'>
-						Set options
+						Задайте параметры
 					</Text>
 					<Select
-						selected={sideBarState.fontFamilyOption}
+						selected={settingsDraft.fontFamilyOption}
 						options={fontFamilyOptions}
-						onChange={fontFamily}
-						title='Font'
+						onChange={onFontFamilyChange}
+						title='Шрифт'
 					/>
 					<RadioGroup
 						name='fontSize'
 						options={fontSizeOptions}
-						selected={sideBarState.fontSizeOption}
-						onChange={fontSize}
-						title='Font size'
+						selected={settingsDraft.fontSizeOption}
+						onChange={onFontSizeChange}
+						title='Размер шрифта'
 					/>
 					<Select
-						selected={sideBarState.fontColor}
+						selected={settingsDraft.fontColor}
 						options={fontColors}
-						onChange={fontColor}
-						title='Font color'
+						onChange={onFontColorChange}
+						title='Цвет шрифта'
 					/>
 					<Separator />
 					<Select
-						selected={sideBarState.backgroundColor}
+						selected={settingsDraft.backgroundColor}
 						options={backgroundColors}
-						onChange={backgroundColor}
-						title='Backgorund color'
+						onChange={onBackgroundColorChange}
+						title='Цвет фона'
 					/>
 					<Select
-						selected={sideBarState.contentWidth}
+						selected={settingsDraft.contentWidth}
 						options={contentWidthArr}
-						onChange={contentWidth}
-						title='Content width'
+						onChange={onContentWidthChange}
+						title='Ширина контента'
 					/>
 					<div className={clsx(styles.bottomContainer)}>
-						<Button title='Reset' htmlType='reset' type='clear' onClick={resetButton} />
-						<Button title='Submit' htmlType='submit' type='apply' />
+						<Button title='Сбросить' htmlType='reset' type='clear' onClick={onReset} />
+						<Button title='Применить' htmlType='submit' type='apply' />
 					</div>
 				</form>
 			</aside>

@@ -8,37 +8,37 @@ import { ArticleParamsForm } from './components/article-params-form';
 import { ArticleStateType, OptionType, defaultArticleState } from './constants/articleProps';
 
 export const App = () => {
-	const [sideBarState, setSideBarState] = useState<ArticleStateType>(defaultArticleState);
-	const [state, setState] = useState(defaultArticleState);
+	const [draftSettings, setDraftSettings] = useState<ArticleStateType>(defaultArticleState);
+	const [appliedSettings, setAppliedSettings] = useState(defaultArticleState);
 
-	const changeFontFamily = (select: OptionType) => {
-		setSideBarState({ ...sideBarState, fontFamilyOption: select });
+	const handleFontFamilyChange = (select: OptionType) => {
+		setDraftSettings({ ...draftSettings, fontFamilyOption: select });
 	};
 
 	const changeFontSize = (select: OptionType) => {
-		setSideBarState({ ...sideBarState, fontSizeOption: select });
+		setDraftSettings({ ...draftSettings, fontSizeOption: select });
 	};
 
-	const changeFontColor = (select: OptionType) => {
-		setSideBarState({ ...sideBarState, fontColor: select });
+	const handleFontColorChange = (select: OptionType) => {
+		setDraftSettings({ ...draftSettings, fontColor: select });
 	};
 
 	const changeContainerWidth = (select: OptionType) => {
-		setSideBarState({ ...sideBarState, contentWidth: select });
+		setDraftSettings({ ...draftSettings, contentWidth: select });
 	};
 
 	const changeBgColor = (select: OptionType) => {
-		setSideBarState({ ...sideBarState, backgroundColor: select });
+		setDraftSettings({ ...draftSettings, backgroundColor: select });
 	};
 
-	const resetSidebarState = () => {
-		setState(defaultArticleState);
-		setSideBarState(defaultArticleState);
+	const handleResetSettings = () => {
+		setAppliedSettings(defaultArticleState);
+		setDraftSettings(defaultArticleState);
 	};
 
 	const applySideBarState = (event: FormEvent) => {
 		event.preventDefault();
-		setState(sideBarState);
+		setAppliedSettings(draftSettings);
 	};
 
 	return (
@@ -46,23 +46,23 @@ export const App = () => {
 			className={styles.main}
 			style={
 				{
-					'--font-family': state.fontFamilyOption.value,
-					'--font-size': state.fontSizeOption.value,
-					'--font-color': state.fontColor.value,
-					'--container-width': state.contentWidth.value,
-					'--bg-color': state.backgroundColor.value,
+					'--font-family': appliedSettings.fontFamilyOption.value,
+					'--font-size': appliedSettings.fontSizeOption.value,
+					'--font-color': appliedSettings.fontColor.value,
+					'--container-width': appliedSettings.contentWidth.value,
+					'--bg-color': appliedSettings.backgroundColor.value,
 				} as CSSProperties
 			}
 		>
 			<ArticleParamsForm
-				fontFamily={changeFontFamily}
-				fontSize={changeFontSize}
-				fontColor={changeFontColor}
-				backgroundColor={changeBgColor}
-				contentWidth={changeContainerWidth}
-				resetButton={resetSidebarState}
-				applyButton={applySideBarState}
-				sideBarState={sideBarState}
+				onFontFamilyChange={handleFontFamilyChange}
+				onFontSizeChange={changeFontSize}
+				onFontColorChange={handleFontColorChange}
+				onBackgroundColorChange={changeBgColor}
+				onContentWidthChange={changeContainerWidth}
+				onReset={handleResetSettings}
+				onApply={applySideBarState}
+				settingsDraft={draftSettings}
 			/>
 			<Article />
 		</main>
