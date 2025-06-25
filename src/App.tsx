@@ -1,74 +1,70 @@
-import { useState, useEffect, useRef } from 'react';
-import { Article } from './components/article';
-import { ArrowButton } from './ui/arrow-button';
-import { ArticleParamsForm } from './components/article-params-form';
-import styles from './components/article-params-form/ArticleParamsForm.module.scss';
-import clsx from 'clsx';
+import { CSSProperties, FormEvent, useState } from 'react';
 
-const defaultSettings = {
-	fontSize: '16px',
-	fontFamily: 'Arial',
-	lineHeight: '1.5',
-	containerWidth: '800px',
-};
+import './styles/index.scss';
+import styles from './styles/index.module.scss';
+
+import { Article } from './components/article';
+import { ArticleParamsForm } from './components/article-params-form';
+import { ArticleStateType, OptionType, defaultArticleState } from './constants/articleProps';
 
 export const App = () => {
-	const [articleSettings, setArticleSettings] = useState(defaultSettings);
-	const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-	const sidebarRef = useRef<HTMLDivElement | null>(null);
+	const [sideBarState, setSideBarState] = useState<ArticleStateType>(defaultArticleState);
+	const [state, setState] = useState(defaultArticleState);
 
-	useEffect(() => {
-		const handleClickOutside = (event: MouseEvent) => {
-			if (
-				sidebarRef.current &&
-				!sidebarRef.current.contains(event.target as Node)
-			) {
-				setIsSidebarOpen(false);
-			}
-		};
+	const changeFontFamily = (select: OptionType) => {
+		setSideBarState({ ...sideBarState, fontFamilyOption: select });
+	};
 
-		if (isSidebarOpen) {
-			document.addEventListener('mousedown', handleClickOutside);
-		} else {
-			document.removeEventListener('mousedown', handleClickOutside);
-		}
+	const changeFontSize = (select: OptionType) => {
+		setSideBarState({ ...sideBarState, fontSizeOption: select });
+	};
 
-		return () => {
-			document.removeEventListener('mousedown', handleClickOutside);
-		};
-	}, [isSidebarOpen]);
+	const changeFontColor = (select: OptionType) => {
+		setSideBarState({ ...sideBarState, fontColor: select });
+	};
 
-	const handleApply = (newSettings: typeof defaultSettings) => {
-		setArticleSettings(newSettings);
-		setIsSidebarOpen(false);
+	const changeContainerWidth = (select: OptionType) => {
+		setSideBarState({ ...sideBarState, contentWidth: select });
+	};
+
+	const changeBgColor = (select: OptionType) => {
+		setSideBarState({ ...sideBarState, backgroundColor: select });
+	};
+
+	const resetSidebarState = () => {
+		setState(defaultArticleState);
+		setSideBarState(defaultArticleState);
+	};
+
+	const applySideBarState = (event: FormEvent) => {
+		event.preventDefault();
+		setState(sideBarState);
 	};
 
 	return (
-		<div
+		<main
+			className={styles.main}
 			style={
 				{
-					'--font-size': articleSettings.fontSize,
-					'--font-family': articleSettings.fontFamily,
-					'--line-height': articleSettings.lineHeight,
-					'--container-width': articleSettings.containerWidth,
-				} as React.CSSProperties
-			}>
-			<ArrowButton
-				isOpen={isSidebarOpen}
-				onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+					'--font-family': state.fontFamilyOption.value,
+					'--font-size': state.fontSizeOption.value,
+					'--font-color': state.fontColor.value,
+					'--container-width': state.contentWidth.value,
+					'--bg-color': state.backgroundColor.value,
+				} as CSSProperties
+			}
+		>
+			<ArticleParamsForm
+				fontFamily={changeFontFamily}
+				fontSize={changeFontSize}
+				fontColor={changeFontColor}
+				backgroundColor={changeBgColor}
+				contentWidth={changeContainerWidth}
+				resetButton={resetSidebarState}
+				applyButton={applySideBarState}
+				sideBarState={sideBarState}
 			/>
-			{isSidebarOpen && (
-				<aside
-					className={clsx(styles.container, { [styles.container_open]: isSidebarOpen })}
-					ref={sidebarRef}
-				>
-					<ArticleParamsForm
-						currentSettings={articleSettings}
-						onApply={handleApply}
-					/>
-				</aside>
-			)}
 			<Article />
-		</div>
+		</main>
 	);
-};
+}; 

@@ -1,49 +1,107 @@
-import { useState, useEffect } from 'react';
-import { Button } from 'src/ui/button';
+import { SyntheticEvent, useCallback, useEffect, useRef, useState, ReactNode, FormEvent } from 'react';
+import clsx from 'clsx';
 
 import styles from './ArticleParamsForm.module.scss';
 
-type ArticleSettings = {
-	fontSize: string;
-	fontFamily: string;
-	lineHeight: string;
-	containerWidth: string;
-};
+import { ArrowButton } from '../../ui/arrow-button';
+import { Button } from '../../ui/button';
+import { RadioGroup } from '../../ui/radio-group';
+import { Select } from '../../ui/select';
+import { OptionType, fontFamilyOptions, ArticleStateType, fontSizeOptions, fontColors, backgroundColors, contentWidthArr } from '../../constants/articleProps';
+import { Separator } from '../../ui/separator';
+import { Text } from '../../ui/text';
 
 type ArticleParamsFormProps = {
-	currentSettings: ArticleSettings;
-	onApply: (settings: ArticleSettings) => void;
+	fontFamily: (select: OptionType) => void;
+	fontSize: (select: OptionType) => void;
+	fontColor: (select: OptionType) => void;
+	backgroundColor: (select: OptionType) => void;
+	contentWidth: (select: OptionType) => void;
+	resetButton: () => void;
+	applyButton: (event: FormEvent) => void;
+	sideBarState: ArticleStateType;
 };
 
-export const ArticleParamsForm = ({ currentSettings, onApply }: ArticleParamsFormProps) => {
-	const [localSettings, setLocalSettings] = useState(currentSettings);
+export const ArticleParamsForm = ({
+	fontFamily,
+	fontSize,
+	fontColor,
+	backgroundColor,
+	contentWidth,
+	resetButton,
+	applyButton,
+	sideBarState,
+}: ArticleParamsFormProps) => {
+	const ref = useRef<HTMLFormElement | null>(null);
+	const [open, setOpen] = useState(false);
 
+	// Простая логика закрытия по клику вне формы
 	useEffect(() => {
-		setLocalSettings(currentSettings);
-	}, [currentSettings]);
+		const handleClickOutside = (event: MouseEvent) => {
+			if (ref.current && !ref.current.contains(event.target as Node)) {
+				setOpen(false);
+			}
+		};
 
-	const handleChange = (key: keyof ArticleSettings, value: string) => {
-		setLocalSettings((prev) => ({ ...prev, [key]: value }));
-	};
+		if (open) {
+			document.addEventListener('mousedown', handleClickOutside);
+		}
 
-	const handleSubmit = (e: React.FormEvent) => {
-		e.preventDefault();
-		onApply(localSettings);
-	};
+		return () => {
+			document.removeEventListener('mousedown', handleClickOutside);
+		};
+	}, [open]);
 
-	const handleReset = () => {
-		setLocalSettings(currentSettings);
-		onApply(currentSettings);
-	};
+	const toggleForm = useCallback(() => {
+		setOpen((prevOpen) => !prevOpen);
+	}, []);
 
 	return (
-		<aside className={styles.container}>
-			<form className={styles.form} onSubmit={handleSubmit} onReset={handleReset}>
-				<div className={styles.bottomContainer}>
-					<Button title='Сбросить' htmlType='reset' type='clear' />
-					<Button title='Применить' htmlType='submit' type='apply' />
-				</div>
-			</form>
-		</aside>
+		<>
+			<ArrowButton onClick={toggleForm} isOpen={open} />
+			<aside className={clsx(styles.container, { [styles.container_open]: open })}>
+				<form className={styles.form} ref={ref} onSubmit={applyButton}>
+					<Text size={31} weight={800} uppercase as={'h3'} align='center'>
+						Set options
+					</Text>
+					<Select
+						selected={sideBarState.fontFamilyOption}
+						options={fontFamilyOptions}
+						onChange={fontFamily}
+						title='Font'
+					/>
+					<RadioGroup
+						name='fontSize'
+						options={fontSizeOptions}
+						selected={sideBarState.fontSizeOption}
+						onChange={fontSize}
+						title='Font size'
+					/>
+					<Select
+						selected={sideBarState.fontColor}
+						options={fontColors}
+						onChange={fontColor}
+						title='Font color'
+					/>
+					<Separator />
+					<Select
+						selected={sideBarState.backgroundColor}
+						options={backgroundColors}
+						onChange={backgroundColor}
+						title='Backgorund color'
+					/>
+					<Select
+						selected={sideBarState.contentWidth}
+						options={contentWidthArr}
+						onChange={contentWidth}
+						title='Content width'
+					/>
+					<div className={clsx(styles.bottomContainer)}>
+						<Button title='Reset' htmlType='reset' type='clear' onClick={resetButton} />
+						<Button title='Submit' htmlType='submit' type='apply' />
+					</div>
+				</form>
+			</aside>
+		</>
 	);
 };

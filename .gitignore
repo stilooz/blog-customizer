@@ -24,3 +24,5 @@ storybook-static
 .DS_Store
 
 .cursor/
+
+backup/
