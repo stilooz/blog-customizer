@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import { Article } from './components/article/Article';
-import { ArrowButton } from './components/arrow-button/ArrowButton';
-import { ArticleParamsForm } from './components/sidebar/ArticleParamsForm';
+import { Article } from './components/article';
+import { ArrowButton } from './ui/arrow-button';
+import { ArticleParamsForm } from './components/article-params-form';
+import styles from './components/article-params-form/ArticleParamsForm.module.scss';
+import clsx from 'clsx';
 
 const defaultSettings = {
 	fontSize: '16px',
@@ -36,6 +38,11 @@ export const App = () => {
 		};
 	}, [isSidebarOpen]);
 
+	const handleApply = (newSettings: typeof defaultSettings) => {
+		setArticleSettings(newSettings);
+		setIsSidebarOpen(false);
+	};
+
 	return (
 		<div
 			style={
@@ -51,9 +58,15 @@ export const App = () => {
 				onClick={() => setIsSidebarOpen(!isSidebarOpen)}
 			/>
 			{isSidebarOpen && (
-				<div className='sidebar' ref={sidebarRef}>
-					<ArticleParamsForm />
-				</div>
+				<aside
+					className={clsx(styles.container, { [styles.container_open]: isSidebarOpen })}
+					ref={sidebarRef}
+				>
+					<ArticleParamsForm
+						currentSettings={articleSettings}
+						onApply={handleApply}
+					/>
+				</aside>
 			)}
 			<Article />
 		</div>
