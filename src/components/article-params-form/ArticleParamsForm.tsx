@@ -1,4 +1,4 @@
-import { SyntheticEvent, useCallback, useEffect, useRef, useState, ReactNode, FormEvent } from 'react';
+import { SyntheticEvent, useCallback, useRef, useState, ReactNode, FormEvent } from 'react';
 import clsx from 'clsx';
 
 import styles from './ArticleParamsForm.module.scss';
@@ -7,96 +7,81 @@ import { ArrowButton } from '../../ui/arrow-button';
 import { Button } from '../../ui/button';
 import { RadioGroup } from '../../ui/radio-group';
 import { Select } from '../../ui/select';
-import { OptionType, fontFamilyOptions, ArticleStateType, fontSizeOptions, fontColors, backgroundColors, contentWidthArr } from '../../constants/articleProps';
+import { OptionType, fontFamilyOptions, ArticleStateType, fontSizeOptions, fontColors, backgroundColors, contentWidthArr, defaultArticleState } from '../../constants/articleProps';
 import { Separator } from '../../ui/separator';
 import { Text } from '../../ui/text';
+import { useOutsideClickClose } from './hooks/useOutsideClickClose';
 
 type ArticleParamsFormProps = {
-	onFontFamilyChange: (select: OptionType) => void;
-	onFontSizeChange: (select: OptionType) => void;
-	onFontColorChange: (select: OptionType) => void;
-	onBackgroundColorChange: (select: OptionType) => void;
-	onContentWidthChange: (select: OptionType) => void;
-	onReset: () => void;
-	onApply: (event: FormEvent) => void;
-	settingsDraft: ArticleStateType;
+	onApply: (settings: ArticleStateType) => void;
 };
 
-export const ArticleParamsForm = ({
-	onFontFamilyChange,
-	onFontSizeChange,
-	onFontColorChange,
-	onBackgroundColorChange,
-	onContentWidthChange,
-	onReset,
-	onApply,
-	settingsDraft,
-}: ArticleParamsFormProps) => {
+export const ArticleParamsForm = ({ onApply }: ArticleParamsFormProps) => {
 	const ref = useRef<HTMLFormElement | null>(null);
 	const [open, setOpen] = useState(false);
+	const [draftSettings, setDraftSettings] = useState<ArticleStateType>(defaultArticleState);
 
-	useEffect(() => {
-		const handleClickOutside = (event: MouseEvent) => {
-			if (ref.current && !ref.current.contains(event.target as Node)) {
-				setOpen(false);
-			}
-		};
-
-		if (open) {
-			document.addEventListener('mousedown', handleClickOutside);
-		}
-
-		return () => {
-			document.removeEventListener('mousedown', handleClickOutside);
-		};
-	}, [open]);
+	useOutsideClickClose(open, ref, () => setOpen(false));
 
 	const toggleForm = useCallback(() => {
 		setOpen((prevOpen) => !prevOpen);
 	}, []);
 
+	const handleOnChange = (field: keyof ArticleStateType) => {
+		return (value: OptionType) => {
+			setDraftSettings((prev) => ({ ...prev, [field]: value }));
+		};
+	};
+	const handleReset = () => {
+		setDraftSettings(defaultArticleState);
+	};
+	const handleApply = (e: FormEvent) => {
+		e.preventDefault();
+		onApply(draftSettings);
+	};
+
 	return (
 		<>
 			<ArrowButton onClick={toggleForm} isOpen={open} />
 			<aside className={clsx(styles.container, { [styles.container_open]: open })}>
-				<form className={styles.form} ref={ref} onSubmit={onApply}>
+				<form className={styles.form} ref={ref} onSubmit={handleApply}>
 					<Text size={31} weight={800} uppercase as={'h3'} align='center'>
 						Задайте параметры
 					</Text>
 					<Select
-						selected={settingsDraft.fontFamilyOption}
+						selected={draftSettings.fontFamilyOption}
 						options={fontFamilyOptions}
-						onChange={onFontFamilyChange}
+						onChange={handleOnChange('fontFamilyOption')}
 						title='Шрифт'
 					/>
 					<RadioGroup
 						name='fontSize'
 						options={fontSizeOptions}
-						selected={settingsDraft.fontSizeOption}
-						onChange={onFontSizeChange}
+						selected={draftSettings.fontSizeOption}
+						onChange={handleOnChange('fontSizeOption')}
 						title='Размер шрифта'
 					/>
 					<Select
-						selected={settingsDraft.fontColor}
+						selected={draftSettings.fontColor}
 						options={fontColors}
-						onChange={onFontColorChange}
+						onChange={handleOnChange('fontColor')}
 						title='Цвет шрифта'
 					/>
 					<Separator />
 					<Select
-						selected={settingsDraft.backgroundColor}
+						selected={draftSettings.backgroundColor}
 						options={backgroundColors}
-						onChange={onBackgroundColorChange}
+						onChange={handleOnChange('backgroundColor')}
 						title='Цвет фона'
 					/>
 					<Select
-						selected={settingsDraft.contentWidth}
+						selected={draftSettings.contentWidth}
 						options={contentWidthArr}
-						onChange={onContentWidthChange}
+						onChange={handleOnChange('contentWidth')}
 						title='Ширина контента'
 					/>
 					<div className={clsx(styles.bottomContainer)}>
-						<Button title='Сбросить' htmlType='reset' type='clear' onClick={onReset} />
+						<Button title='Сбросить' htmlType='reset' type='clear' onClick={handleReset} />
 						<Button title='Применить' htmlType='submit' type='apply' />
 					</div>
 				</form>

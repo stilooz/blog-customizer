@@ -5,40 +5,13 @@ import styles from './styles/index.module.scss';
 
 import { Article } from './components/article';
 import { ArticleParamsForm } from './components/article-params-form';
-import { ArticleStateType, OptionType, defaultArticleState } from './constants/articleProps';
+import { ArticleStateType, defaultArticleState } from './constants/articleProps';
 
 export const App = () => {
-	const [draftSettings, setDraftSettings] = useState<ArticleStateType>(defaultArticleState);
 	const [appliedSettings, setAppliedSettings] = useState(defaultArticleState);
 
-	const handleFontFamilyChange = (select: OptionType) => {
-		setDraftSettings({ ...draftSettings, fontFamilyOption: select });
-	};
-
-	const changeFontSize = (select: OptionType) => {
-		setDraftSettings({ ...draftSettings, fontSizeOption: select });
-	};
-
-	const handleFontColorChange = (select: OptionType) => {
-		setDraftSettings({ ...draftSettings, fontColor: select });
-	};
-
-	const changeContainerWidth = (select: OptionType) => {
-		setDraftSettings({ ...draftSettings, contentWidth: select });
-	};
-
-	const changeBgColor = (select: OptionType) => {
-		setDraftSettings({ ...draftSettings, backgroundColor: select });
-	};
-
-	const handleResetSettings = () => {
-		setAppliedSettings(defaultArticleState);
-		setDraftSettings(defaultArticleState);
-	};
-
-	const applySideBarState = (event: FormEvent) => {
-		event.preventDefault();
-		setAppliedSettings(draftSettings);
+	const handleApply = (settings: ArticleStateType) => {
+		setAppliedSettings(settings);
 	};
 
 	return (
@@ -55,14 +28,7 @@ export const App = () => {
 			}
 		>
 			<ArticleParamsForm
-				onFontFamilyChange={handleFontFamilyChange}
-				onFontSizeChange={changeFontSize}
-				onFontColorChange={handleFontColorChange}
-				onBackgroundColorChange={changeBgColor}
-				onContentWidthChange={changeContainerWidth}
-				onReset={handleResetSettings}
-				onApply={applySideBarState}
-				settingsDraft={draftSettings}
+				onApply={handleApply}
 			/>
 			<Article />
 		</main>
